@@ -402,6 +402,42 @@ The Redis plan lacks the systematic risk analysis structure that makes the inspi
 
 ---
 
+## **12. Migrating to Kakfa**
+
+### **From `01_redis_to_kafka_migration.md`:**
+> **Migration Philosophy**: The Redis implementation should be architected as a **stepping stone to Kafka**, not a dead-end solution. By designing with migration in mind from day one, we can avoid the costly rewrites that plague most messaging system transitions.
+>
+> **Message Abstraction Layer**: Define a broker interface such as `MessageBroker` with `publish()`, `subscribe()`, and `createConsumerGroup()` so both `RedisMessageBroker` and `KafkaMessageBroker` can satisfy the same contract.
+>
+> **When to Consider Kafka Migration**:
+> 1. **Scale Pressure**: >50 agents consuming simultaneously
+> 2. **Durability Requirements**: Need guaranteed message persistence beyond Redis memory
+> 3. **Replay Needs**: Business logic requires historical message replay
+> 4. **Multi-Region**: Need cross-datacenter message replication
+> 5. **Compliance**: Audit requirements for message retention and ordering
+>
+> **Phase 1: Parallel Running**:
+> - Deploy Kafka alongside Redis
+> - Route 10% of traffic to Kafka consumers
+> - Compare behavior and performance metrics
+> - Validate state consistency between systems
+
+### **Redis Plan Currently Says:**
+```markdown
+5. **Stage 5 (Future)**: Kafka migration for enterprise scale (>1k agents)
+```
+
+### **What's Missing:**
+- No **migration philosophy** framing Redis as a strategic stepping stone rather than a temporary implementation
+- No **message abstraction layer** requirement to keep business logic broker-agnostic
+- No **migration trigger framework** beyond a vague future scale milestone
+- No **readiness indicators** showing when the codebase is safe to migrate
+- No **phased cutover strategy** (parallel run, traffic slicing, validation, rollback window)
+- No **zero-downtime success criteria** or code-reuse expectations
+- No **configuration, testing, and monitoring abstractions** that support both Redis and Kafka
+
+---
+
 ## **Summary of Critical Gaps**
 
 The Redis milestone plan is technically sound but lacks the **strategic depth** and **risk management framework** that makes the inspiration documents so comprehensive. Key missing elements:
@@ -416,5 +452,6 @@ The Redis milestone plan is technically sound but lacks the **strategic depth** 
 8. **Unknown Unknowns Strategy** - No "keeping options open" or fail-fast approaches
 9. **Operational Readiness** - No backup, recovery, or deployment considerations
 10. **Measurability Framework** - No manual verification or percentage targets
+11. **Kafka Migration Strategy** - No explicit abstraction, trigger, or cutover plan for Redis → Kafka evolution
 
 These gaps represent the difference between a **technical implementation plan** and a **comprehensive development strategy** that anticipates and prevents common failure modes.
